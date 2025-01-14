@@ -284,9 +284,9 @@
     }, 30);
 
     // Ajuste do intervalo com base na pontuação
-    let baseInterval = 1500; // Intervalo base de 2000ms
-    const speedMultiplier = Math.floor(score / 100); // Incremento com base na pontuação
-    const adjustedInterval = Math.max(250, baseInterval - speedMultiplier * 100); // Intervalo mínimo de 500ms
+    let baseInterval = 1500; // Intervalo base de 1500ms
+    const speedMultiplier = Math.floor(score / 50); // Incremento com base na pontuação
+    const adjustedInterval = Math.max(250, baseInterval - speedMultiplier * 50); // Intervalo mínimo de 250ms
 
     obstacleTimeout = setTimeout(createObstacle, adjustedInterval);
 };
