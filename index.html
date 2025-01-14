@@ -162,46 +162,139 @@
         </div>
     </div>
 
-<script>
-    const createObstacle = () => {
-        const obstacle = document.createElement('div');
-        const type = Math.random() > 0.5 ? 'triangle' : 'hole';
-        obstacle.classList.add('obstacle', type);
-        obstacle.style.left = '100%';
+    <script>
+        const startScreen = document.querySelector('.start-screen');
+        const game = document.querySelector('.game');
+        const gameOverScreen = document.querySelector('.game-over');
+        const character = document.querySelector('.character');
+        const startButton = document.querySelector('.start-btn');
+        const restartButton = document.querySelector('.restart-btn');
+        const scoreElement = document.querySelector('.score');
+        const playerNameInput = document.querySelector('.player-name');
+        const finalScoreElement = document.querySelector('.final-score');
+        const bestScoreElement = document.querySelector('.best-score');
 
-        game.appendChild(obstacle);
+        let isJumping = false;
+        let gameInterval;
+        let obstacleTimeout;
+        let score = 0;
+        let playerName = '';
+        let bestScores = JSON.parse(localStorage.getItem('bestScores')) || {};
 
-        // Velocidade do movimento baseada na pontuação
-        let baseSpeed = 5; // Velocidade base
-        const speedMultiplier = Math.floor(score / 100); // Incremento de velocidade a cada 100 pontos
-        const adjustedSpeed = baseSpeed + speedMultiplier;
-
-        const moveObstacle = setInterval(() => {
-            const obstacleLeft = parseInt(window.getComputedStyle(obstacle).left);
-            const characterBottom = parseInt(window.getComputedStyle(character).bottom);
-            const obstacleBottom = parseInt(window.getComputedStyle(obstacle).bottom);
-
-            if (obstacleLeft < 50 && obstacleLeft > 40 &&
-                ((type === 'hole' && characterBottom <= obstacleBottom) ||
-                 (type === 'triangle' && characterBottom <= obstacleBottom))) {
-                clearInterval(moveObstacle);
-                endGame();
+        const startGame = () => {
+            playerName = playerNameInput.value.trim();
+            if (!playerName) {
+                alert('Por favor, insira seu nome antes de começar!');
+                return;
             }
 
-            if (obstacleLeft <= -50) {
-                clearInterval(moveObstacle);
-                obstacle.remove();
-            } else {
-                obstacle.style.left = `${obstacleLeft - adjustedSpeed}px`;
-            }
-        }, 30);
+            startScreen.style.display = 'none';
+            game.style.display = 'block';
+            gameOverScreen.style.display = 'none';
 
-        // Intervalo aleatório para o próximo obstáculo
-        const randomInterval = Math.random() * 2000 + 1000; // Entre 1000ms e 3000ms
-        obstacleTimeout = setTimeout(createObstacle, randomInterval);
-    };
-</script>
+            score = 0;
+            updateScore();
+
+            gameInterval = setInterval(() => {
+                score++;
+                updateScore();
+            }, 700);
+
+            createObstacle();
+            document.addEventListener('keydown', jump);
+            document.addEventListener('touchstart', touchJump);
+        };
+
+        const endGame = () => {
+            clearInterval(gameInterval);
+            clearTimeout(obstacleTimeout);
+            game.style.display = 'none';
+            gameOverScreen.style.display = 'flex';
+            document.removeEventListener('keydown', jump);
+            document.removeEventListener('touchstart', touchJump);
+            clearObstacles();
+
+            if (!bestScores[playerName] || score > bestScores[playerName]) {
+                bestScores[playerName] = score;
+                localStorage.setItem('bestScores', JSON.stringify(bestScores));
+            }
+
+            finalScoreElement.textContent = `Pontuação Final: ${score}`;
+            bestScoreElement.textContent = `Melhor Pontuação (${playerName}): ${bestScores[playerName]}`;
+        };
+
+        const jump = (e) => {
+            if (e.code === 'Space' && !isJumping) {
+                performJump();
+            }
+        };
+
+        const touchJump = () => {
+            if (!isJumping) {
+                performJump();
+            }
+        };
+
+        const performJump = () => {
+            isJumping = true;
+            character.style.transition = 'bottom 0.8s';
+            character.style.bottom = '200px';
+
+            setTimeout(() => {
+                character.style.bottom = '10%';
+                isJumping = false;
+            }, 500);
+        };
+
+        const updateScore = () => {
+            scoreElement.textContent = `Pontuação: ${score}`;
+        };
+
+        const clearObstacles = () => {
+            const obstacles = document.querySelectorAll('.obstacle');
+            obstacles.forEach(obstacle => obstacle.remove());
+        };
+
+        const createObstacle = () => {
+            const obstacle = document.createElement('div');
+            const type = Math.random() > 0.5 ? 'triangle' : 'hole';
+            obstacle.classList.add('obstacle', type);
+            obstacle.style.left = '100%';
+
+            game.appendChild(obstacle);
+
+            // Velocidade do movimento baseada na pontuação
+            let baseSpeed = 5; // Velocidade base
+            const speedMultiplier = Math.floor(score / 100); // Incremento de velocidade a cada 100 pontos
+            const adjustedSpeed = baseSpeed + speedMultiplier;
+
+            const moveObstacle = setInterval(() => {
+                const obstacleLeft = parseInt(window.getComputedStyle(obstacle).left);
+                const characterBottom = parseInt(window.getComputedStyle(character).bottom);
+                const obstacleBottom = parseInt(window.getComputedStyle(obstacle).bottom);
+
+                if (obstacleLeft < 50 && obstacleLeft > 40 &&
+                    ((type === 'hole' && characterBottom <= obstacleBottom) ||
+                     (type === 'triangle' && characterBottom <= obstacleBottom))) {
+                    clearInterval(moveObstacle);
+                    endGame();
+                }
+
+                if (obstacleLeft <= -50) {
+                    clearInterval(moveObstacle);
+                    obstacle.remove();
+                } else {
+                    obstacle.style.left = `${obstacleLeft - adjustedSpeed}px`;
+                }
+            }, 30);
+
+            // Intervalo aleatório para o próximo obstáculo
+            const randomInterval = Math.random() * 2000 + 1000; // Entre 1000ms e 3000ms
+            obstacleTimeout = setTimeout(createObstacle, randomInterval);
+        };
+
+        startButton.addEventListener('click', startGame);
+        restartButton.addEventListener('click', startGame);
+    </script>
 </body>
 </html>
-
-
