@@ -75,17 +75,17 @@
             font-size: 1.5rem;
             font-weight: bold;
             color: #ffffff;
-            z-index: 5; /* Ajustado para alinhar com obstáculos */
+            z-index: 5;
         }
 
         .obstacle {
             position: absolute;
-            bottom: 10%; /* Alinhado com o personagem */
+            bottom: 10%;
             width: 8vmin;
             height: 8vmin;
             background-color: #ffcc00;
             box-shadow: 0 0 15px 5px #ffcc00;
-            z-index: 5; /* Mesmo nível que o personagem */
+            z-index: 5;
         }
 
         .obstacle.triangle {
@@ -241,7 +241,7 @@
             character.style.bottom = '200px';
 
             setTimeout(() => {
-                character.style.bottom = '10%'; /* Ajustado para alinhar melhor com obstáculos */
+                character.style.bottom = '10%';
                 isJumping = false;
             }, 500);
         };
@@ -255,46 +255,49 @@
             obstacles.forEach(obstacle => obstacle.remove());
         };
 
-    const createObstacle = () => {
-    const obstacle = document.createElement('div');
-    const type = Math.random() > 0.5 ? 'triangle' : 'hole';
-    obstacle.classList.add('obstacle', type);
-    obstacle.style.left = '100%';
+        const createObstacle = () => {
+            const obstacle = document.createElement('div');
+            const type = Math.random() > 0.5 ? 'triangle' : 'hole';
+            obstacle.classList.add('obstacle', type);
+            obstacle.style.left = '100%';
 
-    game.appendChild(obstacle);
+            game.appendChild(obstacle);
 
-    const moveObstacle = setInterval(() => {
-        const obstacleLeft = parseInt(window.getComputedStyle(obstacle).left);
-        const characterBottom = parseInt(window.getComputedStyle(character).bottom);
-        const obstacleBottom = parseInt(window.getComputedStyle(obstacle).bottom);
+            // Velocidade do movimento baseada na pontuação
+            let baseSpeed = 5; // Velocidade base
+            const speedMultiplier = Math.floor(score / 100); // Incremento de velocidade a cada 100 pontos
+            const adjustedSpeed = baseSpeed + speedMultiplier;
 
-        if (obstacleLeft < 50 && obstacleLeft > 40 &&
-            ((type === 'hole' && characterBottom <= obstacleBottom) ||
-             (type === 'triangle' && characterBottom <= obstacleBottom))) {
-            clearInterval(moveObstacle);
-            endGame();
-        }
+            const moveObstacle = setInterval(() => {
+                const obstacleLeft = parseInt(window.getComputedStyle(obstacle).left);
+                const characterBottom = parseInt(window.getComputedStyle(character).bottom);
+                const obstacleBottom = parseInt(window.getComputedStyle(obstacle).bottom);
 
-        if (obstacleLeft <= -50) {
-            clearInterval(moveObstacle);
-            obstacle.remove();
-        } else {
-            obstacle.style.left = `${obstacleLeft - 5}px`;
-        }
-    }, 30);
+                if (obstacleLeft < 50 && obstacleLeft > 40 &&
+                    ((type === 'hole' && characterBottom <= obstacleBottom) ||
+                     (type === 'triangle' && characterBottom <= obstacleBottom))) {
+                    clearInterval(moveObstacle);
+                    endGame();
+                }
 
-    // Ajuste do intervalo com base na pontuação
-    let baseInterval = 1500; // Intervalo base de 1500ms
-    const speedMultiplier = Math.floor(score / 50); // Incremento com base na pontuação
-    const adjustedInterval = Math.max(250, baseInterval - speedMultiplier * 100); // Intervalo mínimo de 250ms
+                if (obstacleLeft <= -50) {
+                    clearInterval(moveObstacle);
+                    obstacle.remove();
+                } else {
+                    obstacle.style.left = `${obstacleLeft - adjustedSpeed}px`;
+                }
+            }, 30);
 
-    obstacleTimeout = setTimeout(createObstacle, adjustedInterval);
-};
+            let baseInterval = 2000; // Intervalo base
+            const adjustedInterval = Math.max(500, baseInterval - speedMultiplier * 100); // Intervalo mínimo
 
+            obstacleTimeout = setTimeout(createObstacle, adjustedInterval);
+        };
 
         startButton.addEventListener('click', startGame);
         restartButton.addEventListener('click', startGame);
     </script>
 </body>
 </html>
+
 
