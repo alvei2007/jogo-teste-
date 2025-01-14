@@ -255,38 +255,42 @@
             obstacles.forEach(obstacle => obstacle.remove());
         };
 
-        const createObstacle = () => {
-            const obstacle = document.createElement('div');
-            const type = Math.random() > 0.5 ? 'triangle' : 'hole';
-            obstacle.classList.add('obstacle', type);
-            obstacle.style.left = '100%';
+    const createObstacle = () => {
+    const obstacle = document.createElement('div');
+    const type = Math.random() > 0.5 ? 'triangle' : 'hole';
+    obstacle.classList.add('obstacle', type);
+    obstacle.style.left = '100%';
 
-            game.appendChild(obstacle);
+    game.appendChild(obstacle);
 
-            const moveObstacle = setInterval(() => {
-                const obstacleLeft = parseInt(window.getComputedStyle(obstacle).left);
-                const characterBottom = parseInt(window.getComputedStyle(character).bottom);
-                const obstacleBottom = parseInt(window.getComputedStyle(obstacle).bottom);
+    const moveObstacle = setInterval(() => {
+        const obstacleLeft = parseInt(window.getComputedStyle(obstacle).left);
+        const characterBottom = parseInt(window.getComputedStyle(character).bottom);
+        const obstacleBottom = parseInt(window.getComputedStyle(obstacle).bottom);
 
-                // Lógica ajustada para verificar colisão
-                if (obstacleLeft < 50 && obstacleLeft > 40 &&
-                    ((type === 'hole' && characterBottom <= obstacleBottom) ||
-                     (type === 'triangle' && characterBottom <= obstacleBottom))) {
-                    clearInterval(moveObstacle);
-                    endGame();
-                }
+        if (obstacleLeft < 50 && obstacleLeft > 40 &&
+            ((type === 'hole' && characterBottom <= obstacleBottom) ||
+             (type === 'triangle' && characterBottom <= obstacleBottom))) {
+            clearInterval(moveObstacle);
+            endGame();
+        }
 
-                if (obstacleLeft <= -50) {
-                    clearInterval(moveObstacle);
-                    obstacle.remove();
-                } else {
-                    obstacle.style.left = `${obstacleLeft - 5}px`;
-                }
-            }, 30);
+        if (obstacleLeft <= -50) {
+            clearInterval(moveObstacle);
+            obstacle.remove();
+        } else {
+            obstacle.style.left = `${obstacleLeft - 5}px`;
+        }
+    }, 30);
 
-            const randomInterval = Math.random() * 2000 + 1000;
-            obstacleTimeout = setTimeout(createObstacle, randomInterval);
-        };
+    // Ajuste do intervalo com base na pontuação
+    let baseInterval = 2000; // Intervalo base de 2000ms
+    const speedMultiplier = Math.floor(score / 100); // Incremento com base na pontuação
+    const adjustedInterval = Math.max(500, baseInterval - speedMultiplier * 100); // Intervalo mínimo de 500ms
+
+    obstacleTimeout = setTimeout(createObstacle, adjustedInterval);
+};
+
 
         startButton.addEventListener('click', startGame);
         restartButton.addEventListener('click', startGame);
